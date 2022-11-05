@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workervotacao
+spec:
+  selector:
+    matchLabels:
+      app: workervotacao
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: workervotacao
+    spec:
+      containers:
+      - name: workervotacao
+        image: renatogroffe/workerquestao-kafka-appinsights-featureflags-dotnet6:1
+        env:
+        - name: FeatureFlags__Monitoring
+          value: "false"
+        - name: FeatureFlags__PersistData
+          value: "false"
+        - name: ApacheKafka__Topic
+          value: topic-votacao
+        - name: ApacheKafka__GroupId
+          value: workervotacao
+        - name: ApacheKafka__Host
+          value: resourcename.servicebus.windows.net:9093
+        - name: ApacheKafka__Username
+          valueFrom:
+            secretKeyRef:
+              name: workervotacaosecret
+              key: UsernameKafka
+        - name: ApacheKafka__Password
+          valueFrom:
+            secretKeyRef:
+              name: workervotacaosecret
+              key: PasswordKafka

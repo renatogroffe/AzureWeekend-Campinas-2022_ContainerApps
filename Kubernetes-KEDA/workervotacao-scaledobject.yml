@@ -1,0 +1,39 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: workervotacao-triggerauth-kafka
+spec:
+  secretTargetRef:
+  - parameter: sasl
+    name: workervotacaosecret
+    key: SaslKafka
+  - parameter: username
+    name: workervotacaosecret
+    key: UsernameKafka
+  - parameter: password
+    name: workervotacaosecret
+    key: PasswordKafka
+  - parameter: tls
+    name: workervotacaosecret
+    key: TlsKafka
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: workervotacao-scaledobject
+spec:
+  scaleTargetRef:
+    name: workervotacao
+  pollingInterval: 15
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: resourcename.servicebus.windows.net:9093
+      consumerGroup: workervotacao
+      topic: topic-votacao
+      lagThreshold: '5'
+      offsetResetPolicy: earliest
+    authenticationRef:
+      name: workervotacao-triggerauth-kafka
